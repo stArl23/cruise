@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class StringUtil extends org.springframework.util.StringUtils {
+public class StringUtils extends org.springframework.util.StringUtils {
     private static final String SPLIT = "&";
 
     /**
@@ -28,7 +28,7 @@ public class StringUtil extends org.springframework.util.StringUtils {
      */
     public static List<String> string2List(String questions) {
         List<String> configList = new ArrayList<>();
-        if (!StringUtil.isEmpty(questions)) {
+        if (!StringUtils.isEmpty(questions)) {
             configList = Arrays.asList(questions.split(SPLIT));
         }
         return configList;
@@ -43,7 +43,7 @@ public class StringUtil extends org.springframework.util.StringUtils {
      */
     public static String appendItem(String ids, String id) {
         if (ids == null ||
-                StringUtil.isEmpty(id) ||
+                StringUtils.isEmpty(id) ||
                 ids.contains(id))
             return ids;
         if (ids.contains(id)) {
@@ -66,8 +66,8 @@ public class StringUtil extends org.springframework.util.StringUtils {
      * @return
      */
     public static String deleteItem(String ids, String id) {
-        if (StringUtil.isEmpty(ids) ||
-                StringUtil.isEmpty(id) ||
+        if (StringUtils.isEmpty(ids) ||
+                StringUtils.isEmpty(id) ||
                 !ids.contains(id))
             return ids;
         int index = ids.indexOf(id);

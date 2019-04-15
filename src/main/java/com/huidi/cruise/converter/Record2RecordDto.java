@@ -2,7 +2,7 @@ package com.huidi.cruise.converter;
 
 import com.huidi.cruise.domain.Record;
 import com.huidi.cruise.dto.RecordDto;
-import com.huidi.cruise.utils.StringUtil;
+import com.huidi.cruise.utils.StringUtils;
 import com.huidi.cruise.utils.interfaces.Excelable;
 
 import java.util.List;
@@ -13,8 +13,8 @@ public class Record2RecordDto {
     public static RecordDto convert(Record record) {
         //use toIntExact to convert long to int safely
         return new RecordDto(record.getId(),record.getArriveTime(), record.getShipName()
-                , StringUtil.getBerthName(record.getStartBerth())
-                ,StringUtil.getBerthName(record.getArriveBerth())
+                , StringUtils.getBerthName(record.getStartBerth())
+                , StringUtils.getBerthName(record.getArriveBerth())
                 , record.getStartTime(), record.getTotalTime().toString()
                 , record.getTotalTime().toString());
     }

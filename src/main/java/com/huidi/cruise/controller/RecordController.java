@@ -13,8 +13,9 @@ import com.huidi.cruise.exception.RecordException;
 import com.huidi.cruise.form.RecordRequestForm;
 import com.huidi.cruise.service.RecordService;
 import com.huidi.cruise.utils.CacheUtils;
-import com.huidi.cruise.utils.RecordsVOutil;
-import com.huidi.cruise.utils.ResultVOUtil;
+import com.huidi.cruise.utils.PageVOUtils;
+import com.huidi.cruise.utils.RecordsVOutils;
+import com.huidi.cruise.utils.ResultVOUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -68,7 +69,7 @@ public class RecordController {
         }
         CacheUtils.setObject(RecordConstant.RECORDS, records);
         //default the first page
-        return ResultVOUtil.success(RecordsVOutil.getRecordsVO(form, records.subList(0,10<records.size()?10:records.size())));
+        return ResultVOUtils.success(RecordsVOutils.getRecordsVO(form, records));
     }
 
 
@@ -80,18 +81,18 @@ public class RecordController {
     public ResultVO<RecordDto> list(@RequestParam("date") String date,@RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize,@RequestParam(name="pageNum",defaultValue="1")Integer pageNum) {
 
         List<Record> records = (List<Record>) CacheUtils.getObject(RecordConstant.RECORDS);
+        //load data from database
         if (Objects.isNull(records) || records.isEmpty()) {
             records = recordService.listRecords(date);
         }
-        //load data from database
+
         if (Objects.isNull(records) || records.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(), RecordEnums.RECORD_NOT_CREATE.getMessage());
         } else {
             CacheUtils.setObject(RecordConstant.RECORDS, records);
         }
 
-        records=records.subList((pageNum-1)*pageSize,pageNum*pageSize<=records.size()?pageNum*pageSize:records.size());
-        return ResultVOUtil.success(Record2RecordDto.convert(records));
+        return ResultVOUtils.success(PageVOUtils.page(pageNum, pageSize, Record2RecordDto.convert(records)));
     }
 
 
@@ -123,7 +124,7 @@ public class RecordController {
             //缓存中不存在该记录
             throw new RecordException(RecordEnums.RECORD_NOT_EXIST.getId(), RecordEnums.RECORD_NOT_EXIST.getMessage());
         }
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 
     @GetMapping("/excel")
@@ -142,7 +143,7 @@ public class RecordController {
         } catch (IOException e) {
             throw new CommonException(CommonEnums.OBJECT_NULL.getId(), CommonEnums.OBJECT_NULL.getMessage());
         }
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 
     @GetMapping("/publish")
@@ -153,6 +154,6 @@ public class RecordController {
         }else{
             recordService.saveRecord(records);
         }
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 }

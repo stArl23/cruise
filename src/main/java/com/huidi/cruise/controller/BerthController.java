@@ -4,14 +4,17 @@ import com.huidi.cruise.VO.ResultVO;
 import com.huidi.cruise.converter.Berth2BerthDto;
 import com.huidi.cruise.dto.BerthDto;
 import com.huidi.cruise.service.BerthService;
-import com.huidi.cruise.utils.ResultVOUtil;
+import com.huidi.cruise.utils.ResultVOUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -25,7 +28,7 @@ public class BerthController {
     @GetMapping("/list")
     @ApiOperation(value="list all berths",notes = "list all berths",httpMethod = "GET",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultVO<List<BerthDto>> list() {
-        return ResultVOUtil.success(Berth2BerthDto.convert(berthService.listAllBerth()));
+        return ResultVOUtils.success(Berth2BerthDto.convert(berthService.listAllBerth()));
     }
 
     @GetMapping("/enable")
@@ -35,7 +38,7 @@ public class BerthController {
     })
     public ResultVO enable(@RequestParam("id") String id) {
         berthService.enableBerth(id);
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 
     @GetMapping("/disable")
@@ -45,6 +48,6 @@ public class BerthController {
     })
     public ResultVO disable(@RequestParam("id") String id) {
         berthService.disableBerth(id);
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 }

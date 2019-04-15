@@ -6,7 +6,7 @@ import com.huidi.cruise.VO.ResultVO;
  * Created by 廖师兄
  * 2017-05-15 00:22
  */
-public class ResultVOUtil {
+public class ResultVOUtils {
 
     public static ResultVO success(Object object) {
         ResultVO resultVO = new ResultVO();

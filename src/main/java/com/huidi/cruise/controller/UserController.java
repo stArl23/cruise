@@ -9,7 +9,7 @@ import com.huidi.cruise.exception.UserException;
 import com.huidi.cruise.form.LoginForm;
 import com.huidi.cruise.service.UserService;
 import com.huidi.cruise.utils.CookieUtil;
-import com.huidi.cruise.utils.ResultVOUtil;
+import com.huidi.cruise.utils.ResultVOUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -49,7 +49,7 @@ public class UserController {
 
         // set cookie in front end
        // CookieUtil.set(response, CookieConstant.TOKEN, username, CookieConstant.EXPIRE);
-        return ResultVOUtil.success(username);
+        return ResultVOUtils.success(username);
     }
 
     @GetMapping("/logout")
@@ -65,8 +65,8 @@ public class UserController {
         if (Objects.isNull(cookie)) {
             throw new CommonException(CommonEnums.OBJECT_NULL);
         }
-       // if (username.equals(cookie.getValue())) ResultVOUtil.error(12, "");
+        // if (username.equals(cookie.getValue())) ResultVOUtils.error(12, "");
         CookieUtil.set(response, CookieConstant.TOKEN, username, 0);
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 }

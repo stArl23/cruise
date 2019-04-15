@@ -4,7 +4,7 @@ import com.huidi.cruise.VO.ResultVO;
 import com.huidi.cruise.domain.Ship;
 import com.huidi.cruise.form.ShipForm;
 import com.huidi.cruise.service.ShipService;
-import com.huidi.cruise.utils.ResultVOUtil;
+import com.huidi.cruise.utils.ResultVOUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -36,13 +36,13 @@ public class ShipController {
         } else {
             shipService.changeShip(ship);
         }
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 
     @GetMapping("/list")
     @ApiOperation(value="list all ships",notes = "list all ships",httpMethod = "GET",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultVO<List<Ship>> list() {
-        return ResultVOUtil.success(shipService.listAllShips());
+        return ResultVOUtils.success(shipService.listAllShips());
     }
 
     @GetMapping("/enable")
@@ -53,7 +53,7 @@ public class ShipController {
     })
     public ResultVO enable(@RequestParam("id") String id) {
         shipService.enableShip(id);
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 
     @GetMapping("/disable")
@@ -63,6 +63,6 @@ public class ShipController {
     })
     public ResultVO disable(@RequestParam("id") String id) {
         shipService.disableShip(id);
-        return ResultVOUtil.success();
+        return ResultVOUtils.success();
     }
 }

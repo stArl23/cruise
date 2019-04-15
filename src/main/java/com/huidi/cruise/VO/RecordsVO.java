@@ -4,8 +4,6 @@ package com.huidi.cruise.VO;
 import com.huidi.cruise.dto.RecordDto;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class RecordsVO {
 
@@ -24,6 +22,6 @@ public class RecordsVO {
     private Integer smallShipNumber;
     private Integer smallShipWaitTime;
 
-    private List<RecordDto> records;
+    private PageVO<RecordDto> pageVO;
 
 }
