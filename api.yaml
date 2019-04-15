@@ -1,0 +1,640 @@
+swagger: '2.0'
+info:
+  description: cruise_management system restful api
+  version: '1.0'
+  title: cruise_management
+host: 'localhost:8083'
+basePath: /
+tags:
+  - name: berth-controller
+    description: the api of berths
+  - name: record-controller
+    description: the api of records
+  - name: ship-controller
+    description: the api of ships
+  - name: user-controller
+    description: the api of users
+paths:
+  /berth/disable:
+    get:
+      tags:
+        - berth-controller
+      summary: disable a berth
+      description: disable a berth
+      operationId: disableUsingGET
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: id
+          in: query
+          description: unique id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /berth/enable:
+    get:
+      tags:
+        - berth-controller
+      summary: enable a berth
+      description: enable a berth
+      operationId: enableUsingGET
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: id
+          in: query
+          description: unique id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /berth/list:
+    get:
+      tags:
+        - berth-controller
+      summary: list all berths
+      description: list all berths
+      operationId: listUsingGET
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO«List«BerthDto»»'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /records/create:
+    post:
+      tags:
+        - record-controller
+      summary: list
+      operationId: listUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: bigShipTraffic
+          in: query
+          description: maximum traffic of big ship
+          required: false
+          type: integer
+          format: int32
+          x-example: 200
+        - name: date
+          in: query
+          description: date of the day
+          required: false
+          type: string
+          x-example: '2019-02-18'
+        - name: endTime
+          in: query
+          description: end time
+          required: false
+          type: string
+          x-example: '07:15:00'
+        - name: isGoldenWeek
+          in: query
+          description: is golden week or not
+          required: false
+          type: boolean
+          x-example: 'false'
+        - name: smallShipTraffic
+          in: query
+          description: maximum traffic of small ship
+          required: false
+          type: integer
+          format: int32
+          x-example: 100
+        - name: startTime
+          in: query
+          description: start time
+          required: false
+          type: string
+          x-example: '07:00:00'
+        - name: timeForSailing
+          in: query
+          description: flight time
+          required: false
+          type: integer
+          format: int32
+          x-example: '15'
+        - name: traffic
+          in: query
+          description: forecasting traffic
+          required: false
+          type: integer
+          format: int32
+          x-example: 10040
+        - name: weather
+          in: query
+          description: weather
+          required: false
+          type: string
+          x-example: good weather
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO«RecordsVO»'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /records/delete:
+    get:
+      tags:
+        - record-controller
+      summary: list records by id
+      description: list records by id
+      operationId: deleteUsingGET
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: id
+          in: query
+          description: id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /records/list:
+    get:
+      tags:
+        - record-controller
+      summary: list records by date
+      description: list records by date
+      operationId: listUsingGET_1
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: date
+          in: query
+          description: date
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO«RecordDto»'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /ship/disable:
+    get:
+      tags:
+        - ship-controller
+      summary: disable a ship
+      description: disable a ship
+      operationId: disableUsingGET_1
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: id
+          in: query
+          description: unique id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /ship/enable:
+    get:
+      tags:
+        - ship-controller
+      summary: enable a ship
+      description: enable a ship
+      operationId: enableUsingGET_1
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: id
+          in: query
+          description: unique id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /ship/list:
+    get:
+      tags:
+        - ship-controller
+      summary: list all ships
+      description: list all ships
+      operationId: listUsingGET_2
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO«List«Ship»»'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /ship/save:
+    post:
+      tags:
+        - ship-controller
+      summary: ' saveRecord information of a ship'
+      description: ' saveRecord information of a ship'
+      operationId: createUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: SNumber
+          in: query
+          required: false
+          type: integer
+          format: int32
+        - name: id
+          in: query
+          description: unique id
+          required: false
+          type: string
+          x-example: '1549955049683998275'
+        - name: isAvailable
+          in: query
+          description: ship is available or not
+          required: false
+          type: boolean
+          x-example: true
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /user/login:
+    post:
+      tags:
+        - user-controller
+      summary: user login
+      description: ' user login, add username to cookie'
+      operationId: loginUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: password
+          in: query
+          description: password
+          required: false
+          type: string
+          x-example: 2635700w
+        - name: username
+          in: query
+          description: username
+          required: false
+          type: string
+          x-example: wanghuidi
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO«string»'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /user/logout:
+    get:
+      tags:
+        - user-controller
+      summary: user logout
+      description: ' user logout, delete username from cookie'
+      operationId: logoutUsingGET
+      produces:
+        - '*/*'
+        - application/json;charset=UTF-8
+      parameters:
+        - name: username
+          in: query
+          description: username of user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ResultVO'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+definitions:
+  BerthDto:
+    type: object
+    properties:
+      id:
+        type: string
+      isAvailable:
+        type: boolean
+      name:
+        type: string
+    title: BerthDto
+  Record:
+    type: object
+    properties:
+      arriveBerth:
+        type: integer
+        format: int32
+      arriveTime:
+        $ref: '#/definitions/Time'
+      date:
+        type: string
+        format: date
+      id:
+        type: string
+      onOrOutTime:
+        $ref: '#/definitions/Time'
+      shipName:
+        type: string
+      shipTraffic:
+        type: integer
+        format: int32
+      startBerth:
+        type: integer
+        format: int32
+      startTime:
+        $ref: '#/definitions/Time'
+      totalTime:
+        $ref: '#/definitions/Time'
+    title: Record
+  RecordDto:
+    type: object
+    properties:
+      arriveBerth:
+        type: string
+      arriveBerthTime:
+        type: string
+      arriveTime:
+        type: string
+      id:
+        type: string
+      shipName:
+        type: string
+      startBerth:
+        type: string
+      startTime:
+        type: string
+      timeForSailing:
+        type: integer
+        format: int32
+      waitTime:
+        type: integer
+        format: int32
+    title: RecordDto
+  RecordsVO:
+    type: object
+    properties:
+      bigShipNumber:
+        type: integer
+        format: int32
+      bigShipTraffic:
+        type: integer
+        format: int32
+      bigShipWaitTime:
+        type: integer
+        format: int32
+      date:
+        type: string
+      hours:
+        type: string
+      isGoldenWeek:
+        type: boolean
+      records:
+        type: array
+        items:
+          $ref: '#/definitions/RecordDto'
+      smallShipNumber:
+        type: integer
+        format: int32
+      smallShipTraffic:
+        type: integer
+        format: int32
+      smallShipWaitTime:
+        type: integer
+        format: int32
+      timeForSailing:
+        type: integer
+        format: int32
+      traffic:
+        type: integer
+        format: int32
+      weather:
+        type: string
+    title: RecordsVO
+  ResultVO:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      data:
+        type: object
+      msg:
+        type: string
+    title: ResultVO
+  ResultVO«List«BerthDto»»:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/BerthDto'
+      msg:
+        type: string
+    title: ResultVO«List«BerthDto»»
+  ResultVO«List«Ship»»:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/Ship'
+      msg:
+        type: string
+    title: ResultVO«List«Ship»»
+  ResultVO«RecordsVO»:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      data:
+        $ref: '#/definitions/RecordsVO'
+      msg:
+        type: string
+    title: ResultVO«RecordsVO»
+  ResultVO«Record»:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      data:
+        $ref: '#/definitions/Record'
+      msg:
+        type: string
+    title: ResultVO«Record»
+  ResultVO«string»:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      data:
+        type: string
+      msg:
+        type: string
+    title: ResultVO«string»
+  Ship:
+    type: object
+    properties:
+      capability:
+        type: integer
+        format: int32
+      id:
+        type: string
+      isAvailable:
+        type: boolean
+      snumber:
+        type: string
+    title: Ship
+  Time:
+    type: object
+    properties:
+      date:
+        type: integer
+        format: int32
+      day:
+        type: integer
+        format: int32
+      hours:
+        type: integer
+        format: int32
+      minutes:
+        type: integer
+        format: int32
+      month:
+        type: integer
+        format: int32
+      seconds:
+        type: integer
+        format: int32
+      time:
+        type: integer
+        format: int64
+      timezoneOffset:
+        type: integer
+        format: int32
+      year:
+        type: integer
+        format: int32
+    title: Time
