@@ -6,6 +6,7 @@ import com.huidi.cruise.dto.RecordDto;
 import com.huidi.cruise.form.RecordRequestForm;
 
 import javax.servlet.ServletOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface RecordService {
@@ -15,7 +16,7 @@ public interface RecordService {
      * @param form the request form to create record list
      * @return
      */
-    List<Record> drainage(RecordRequestForm form);
+    ArrayList<ArrayList<Record>> drainage(RecordRequestForm form);
 
 
     /***

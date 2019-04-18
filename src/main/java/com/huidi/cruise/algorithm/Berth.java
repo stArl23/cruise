@@ -5,6 +5,7 @@ import java.sql.Time;
 public class Berth {
     private String name;
     private boolean isAvailable;
+    private int freq;
     private Time earlyBusyTime;
     private Time lateBusyTime;
 
@@ -14,6 +15,7 @@ public class Berth {
         this.isAvailable = isAvailable;
         this.earlyBusyTime = earlyBusyTime;
         this.lateBusyTime = lateBusyTime;
+        freq = 0;
     }
 
     public String getName() {
@@ -46,5 +48,17 @@ public class Berth {
 
     public void setLateBusyTime(Time lateBusyTime) {
         this.lateBusyTime = lateBusyTime;
+    }
+
+    public int getFreq() {
+        return freq;
+    }
+
+    public void setFreq(int freq) {
+        this.freq = freq;
+    }
+
+    public void freqAdd() {
+        this.freq++;
     }
 }

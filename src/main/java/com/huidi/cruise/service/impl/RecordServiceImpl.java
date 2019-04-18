@@ -25,6 +25,7 @@ import javax.servlet.ServletOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Date;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class RecordServiceImpl implements RecordService {
 
     //等算法完成后
     @Override
-    public List<Record> drainage(RecordRequestForm form) {
+    public ArrayList<ArrayList<Record>> drainage(RecordRequestForm form) {
         //TODO
         ArrayList<Berth> berths= (ArrayList<Berth>) berthRepository.findBerthByIsAvailableTrue();
         ArrayList<Ship> ships= (ArrayList<Ship>) shipRepository.findShipsByIsAvailableIsTrue();
@@ -53,11 +54,11 @@ public class RecordServiceImpl implements RecordService {
         ArrayList<Berth> startBerths= (ArrayList<Berth>) berths.stream().filter(e->e.getSNumber()<= BerthConstant.DEVIDED).collect(Collectors.toList());
         ArrayList<Berth> endBerths= (ArrayList<Berth>) berths.stream().filter(e->e.getSNumber()>BerthConstant.DEVIDED).collect(Collectors.toList());
 
-        Algorithm algorithm=new Algorithm((ArrayList<com.huidi.cruise.algorithm.Berth>) Berth2Berth_A.convert(startBerths),
+        Algorithm algorithm = new Algorithm(Date.valueOf(form.getDate()), Time.valueOf(form.getStartTime()), Time.valueOf(form.getEndTime()), (ArrayList<com.huidi.cruise.algorithm.Berth>) Berth2Berth_A.convert(startBerths),
                 (ArrayList<com.huidi.cruise.algorithm.Berth>) Berth2Berth_A.convert(endBerths),
                 (ArrayList<com.huidi.cruise.algorithm.Ship>) Ship2Ship_A.convert(bigShips),
-                (ArrayList<com.huidi.cruise.algorithm.Ship>) Ship2Ship_A.convert(smallShips),Date.valueOf(form.getDate()));
-        List<Record> records;
+                (ArrayList<com.huidi.cruise.algorithm.Ship>) Ship2Ship_A.convert(smallShips));
+        ArrayList<ArrayList<Record>> records;
         if(form.getIsGoldenWeek()==1){
             records=algorithm.findMax();
         }else{

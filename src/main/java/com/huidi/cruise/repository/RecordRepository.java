@@ -9,5 +9,5 @@ import java.util.List;
 public interface RecordRepository extends JpaRepository<Record, String> {
     List<Record> findAllByDate(Date date);
 
-    Boolean existsByDateEquals(Date date);
+    Integer countRecordsByDateBetween(Date start, Date after);
 }

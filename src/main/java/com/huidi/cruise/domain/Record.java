@@ -1,9 +1,8 @@
 package com.huidi.cruise.domain;
 
-import com.huidi.cruise.algorithm.Algorithm;
 import com.huidi.cruise.algorithm.RecordParams;
 import com.huidi.cruise.utils.KeyUtils;
-import com.huidi.cruise.utils.interfaces.Excelable;
+import com.huidi.cruise.utils.TimeUtils;
 import lombok.Data;
 
 import javax.persistence.Entity;
@@ -43,15 +42,15 @@ public class Record implements Serializable{
 
     public Record(RecordParams recordParams) {
         this.id= KeyUtils.genUniqueKey();
-        this.startBerth=Integer.valueOf(recordParams.getStartBerthAlgorithm().getName());
-        this.arriveBerth=Integer.valueOf(recordParams.getArriveBerthAlgorithm().getName());
+        this.startBerth = Integer.valueOf(recordParams.getStartBerth().getName());
+        this.arriveBerth = Integer.valueOf(recordParams.getArriveBerth().getName());
         this.shipName=recordParams.getShip().getName();
         this.shipTraffic=recordParams.getShipTraffic();
         this.startTime=recordParams.getDelayTime().after(recordParams.getStartTime())?recordParams.getDelayTime():recordParams.getStartTime();
         //this.arriveTime=Algorithm.timeOperation("-",recordParams.getArriveBerthAlgorithm().getEarlyBusyTime(),Algorithm.secondToTime(recordParams.getSecond()));
-        this.arriveTime=recordParams.getArriveBerthAlgorithm().getEarlyBusyTime();
-        this.totalTime= Algorithm.timeOperation("+",Algorithm.timeOperation("-",this.arriveTime,this.startTime),Algorithm.secondToTime(recordParams.getSecond()));
-        this.onOrOutTime=Algorithm.secondToTime(recordParams.getSecond()*2);
+        this.arriveTime = recordParams.getArriveBerth().getEarlyBusyTime();
+        this.totalTime = TimeUtils.timeOperation("+", TimeUtils.timeOperation("-", this.arriveTime, this.startTime), TimeUtils.secondToTime(recordParams.getSecond()));
+        this.onOrOutTime = TimeUtils.secondToTime(recordParams.getSecond() * 2);
         this.date=recordParams.getDate();
     }
 

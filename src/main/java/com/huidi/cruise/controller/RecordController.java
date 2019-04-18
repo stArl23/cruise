@@ -2,6 +2,7 @@ package com.huidi.cruise.controller;
 
 import com.huidi.cruise.VO.RecordsVO;
 import com.huidi.cruise.VO.ResultVO;
+import com.huidi.cruise.constant.BerthConstant;
 import com.huidi.cruise.constant.RecordConstant;
 import com.huidi.cruise.converter.Record2RecordDto;
 import com.huidi.cruise.domain.Record;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,6 +46,7 @@ public class RecordController {
     private RedisTemplate redisTemplate;*/
 
     //create record list
+    //return go island list default
     @PostMapping("/create")
     public ResultVO<RecordsVO> create(@Valid RecordRequestForm form, BindingResult bindingResult) {
         //校验
@@ -53,23 +56,40 @@ public class RecordController {
         }
 
 
-        List<Record> records = (List<Record>) CacheUtils.getObject(RecordConstant.RECORDS);
+        List<Record> goIslandList = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        List<Record> goBackList = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+        List<Record> records = new ArrayList<>();
+        records.addAll(goIslandList);
+        records.addAll(goBackList);
         //load data from cache
         if (Objects.isNull(records) || records.isEmpty()) {
             records = recordService.listRecords(new Date(System.currentTimeMillis()).toString());
         }
 
+
         //load data from database
+        ArrayList<ArrayList<Record>> recordsList = new ArrayList<>();
         if (Objects.isNull(records) || records.isEmpty()) {
             records = recordService.listRecords(new Date(System.currentTimeMillis()).toString());
         }
         //generate records
         if (Objects.isNull(records) || records.isEmpty()) {
-            records = recordService.drainage(form);
+            recordsList = recordService.drainage(form);
+        } else {
+            recordsList.add(0, new ArrayList<>());
+            recordsList.add(1, new ArrayList<>());
+            for (Record record : records) {
+                if (record.getStartBerth() <= BerthConstant.DEVIDED) {
+                    recordsList.get(0).add(record);
+                } else {
+                    recordsList.get(1).add(record);
+                }
+            }
         }
-        CacheUtils.setObject(RecordConstant.RECORDS, records);
+        CacheUtils.setObject(RecordConstant.GOISLANDRECORDS, recordsList.get(0));
+        CacheUtils.setObject(RecordConstant.GOBACKRECORDS, recordsList.get(1));
         //default the first page
-        return ResultVOUtils.success(RecordsVOutils.getRecordsVO(form, records));
+        return ResultVOUtils.success(RecordsVOutils.getRecordsVO(form, recordsList.get(0)));
     }
 
 
@@ -78,18 +98,39 @@ public class RecordController {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "date", value = "date", required = true),
     })
-    public ResultVO<RecordDto> list(@RequestParam("date") String date,@RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize,@RequestParam(name="pageNum",defaultValue="1")Integer pageNum) {
+    public ResultVO<RecordDto> list(@RequestParam("date") String date, @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum, @RequestParam(name = "isBack", defaultValue = "0") Integer isBack) {
 
-        List<Record> records = (List<Record>) CacheUtils.getObject(RecordConstant.RECORDS);
+
+        List<Record> records;
+        if (isBack == 1) {
+            records = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+        } else {
+            records = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        }
+
         //load data from database
         if (Objects.isNull(records) || records.isEmpty()) {
             records = recordService.listRecords(date);
+            List<Record> tempList = new ArrayList<>();
+            for (Record record : records) {
+                if (isBack == 1 && record.getStartBerth() <= BerthConstant.DEVIDED) {
+                    tempList.add(record);
+                } else if (isBack == 0 && record.getStartBerth() > BerthConstant.DEVIDED) {
+                    tempList.add(record);
+                }
+            }
+            records = tempList;
+            records.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
         }
 
         if (Objects.isNull(records) || records.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(), RecordEnums.RECORD_NOT_CREATE.getMessage());
         } else {
-            CacheUtils.setObject(RecordConstant.RECORDS, records);
+            if (isBack == 1) {
+                CacheUtils.setObject(RecordConstant.GOBACKRECORDS, records);
+            } else {
+                CacheUtils.setObject(RecordConstant.GOISLANDRECORDS, records);
+            }
         }
 
         return ResultVOUtils.success(PageVOUtils.page(pageNum, pageSize, Record2RecordDto.convert(records)));
@@ -101,9 +142,9 @@ public class RecordController {
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "query", dataType = "String", name = "id", value = "id", required = true),
     })
-    public ResultVO delete(@RequestParam("id") String id) {
+    public ResultVO delete(@RequestParam("id") String id, @RequestParam("isBack") Integer isBack) {
         //recordService.deleteRecord(id);
-        List<Record> records = (List<Record>) CacheUtils.getObject(RecordConstant.RECORDS);
+        List<Record> records = (List<Record>) (isBack == 1 ? CacheUtils.getObject(RecordConstant.GOBACKRECORDS) : CacheUtils.getObject(RecordConstant.GOISLANDRECORDS));
         if (Objects.isNull(records) || records.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(), RecordEnums.RECORD_NOT_CREATE.getMessage());
         }
@@ -119,7 +160,7 @@ public class RecordController {
 
         if (flag) {
             recordService.deleteRecord(id);
-            CacheUtils.setObject(RecordConstant.RECORDS, records);
+            CacheUtils.setObject(isBack == 1 ? RecordConstant.GOBACKRECORDS : RecordConstant.GOISLANDRECORDS, records);
         } else {
             //缓存中不存在该记录
             throw new RecordException(RecordEnums.RECORD_NOT_EXIST.getId(), RecordEnums.RECORD_NOT_EXIST.getMessage());
@@ -130,9 +171,14 @@ public class RecordController {
     @GetMapping("/excel")
     public ResultVO excel(HttpServletResponse response) {
         //only when cache contains data can be used
-        List<Record> records = (List<Record>) CacheUtils.getObject(RecordConstant.RECORDS);
-        if (Objects.isNull(records) || records.isEmpty()) {
+        List<Record> goBackList = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+        List<Record> goIslandList = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        List<Record> records = new ArrayList<>();
+        if (Objects.isNull(goIslandList) || goIslandList.isEmpty() || Objects.isNull(goBackList) || goBackList.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(), RecordEnums.RECORD_NOT_CREATE.getMessage());
+        } else {
+            records.addAll(goIslandList);
+            records.addAll(goBackList);
         }
 
         response.setContentType("multipart/form-data");
@@ -148,10 +194,14 @@ public class RecordController {
 
     @GetMapping("/publish")
     public ResultVO publish(){
-        List<Record> records= (List<Record>) CacheUtils.getObject(RecordConstant.RECORDS);
-        if(Objects.isNull(records)||records.isEmpty()){
+        List<Record> goBackList = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+        List<Record> goIslandList = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        if (Objects.isNull(goIslandList) || goIslandList.isEmpty() || Objects.isNull(goBackList) || goBackList.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(),RecordEnums.RECORD_NOT_CREATE.getMessage());
         }else{
+            List<Record> records = new ArrayList<>();
+            records.addAll(goIslandList);
+            records.addAll(goBackList);
             recordService.saveRecord(records);
         }
         return ResultVOUtils.success();

@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
 import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 
 @RunWith(SpringRunner.class)
@@ -45,18 +46,20 @@ public class AlgorithmTest {
             Ship ship=new Ship("B"+String.valueOf(i),200);
             bigShips.add(ship);
         }
-        algorithm= new Algorithm(startBerthAlgorithms, arriveBerthAlgorithms,bigShips,smallShips,new Date(System.currentTimeMillis()));
+        algorithm = new Algorithm(new Date(System.currentTimeMillis()), Time.valueOf("7:00:00"), Time.valueOf("18:00:00"), startBerthAlgorithms, arriveBerthAlgorithms, bigShips, smallShips);
     }
 
     @Test
+    @Transactional
     public void findOpt() {
-        ArrayList<com.huidi.cruise.domain.Record> records=algorithm.findOpt(10040);
+        ArrayList<ArrayList<Record>> records = algorithm.findOpt(10040);
 //        System.out.println(records.get(0));
 //        recordRepository.save(records.get(0));
-        for (Record r1:records) {
+        //test go Island lsit
+        for (Record r1 : records.get(0)) {
             System.out.println(r1);
         }
-        recordRepository.saveAll(records);
+        recordRepository.saveAll(records.get(0));
 
     }
 
