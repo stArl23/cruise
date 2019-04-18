@@ -1,7 +1,9 @@
 package com.huidi.cruise.service.impl;
 
 import com.huidi.cruise.algorithm.Algorithm;
+import com.huidi.cruise.constant.AlgorithmConstant;
 import com.huidi.cruise.constant.BerthConstant;
+import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.converter.Berth2Berth_A;
 import com.huidi.cruise.converter.Record2RecordDto;
 import com.huidi.cruise.converter.Ship2Ship_A;
@@ -57,10 +59,10 @@ public class RecordServiceImpl implements RecordService {
         Algorithm algorithm = new Algorithm(Date.valueOf(form.getDate()), Time.valueOf(form.getStartTime()), Time.valueOf(form.getEndTime()), (ArrayList<com.huidi.cruise.algorithm.Berth>) Berth2Berth_A.convert(startBerths),
                 (ArrayList<com.huidi.cruise.algorithm.Berth>) Berth2Berth_A.convert(endBerths),
                 (ArrayList<com.huidi.cruise.algorithm.Ship>) Ship2Ship_A.convert(bigShips),
-                (ArrayList<com.huidi.cruise.algorithm.Ship>) Ship2Ship_A.convert(smallShips));
+                (ArrayList<com.huidi.cruise.algorithm.Ship>) Ship2Ship_A.convert(smallShips), form.getWeather() == 1 ? ShipConstant.WAIT_SECOND : (int) (ShipConstant.WAIT_SECOND * AlgorithmConstant.DELAYRATE));
         ArrayList<ArrayList<Record>> records;
         if(form.getIsGoldenWeek()==1){
-            records=algorithm.findMax();
+            records = algorithm.findMax(form.getTraffic());
         }else{
             records=algorithm.findOpt(form.getTraffic());
         }

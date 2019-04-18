@@ -50,7 +50,7 @@ public class Record implements Serializable{
         //this.arriveTime=Algorithm.timeOperation("-",recordParams.getArriveBerthAlgorithm().getEarlyBusyTime(),Algorithm.secondToTime(recordParams.getSecond()));
         this.arriveTime = recordParams.getArriveBerth().getEarlyBusyTime();
         this.totalTime = TimeUtils.timeOperation("+", TimeUtils.timeOperation("-", this.arriveTime, this.startTime), TimeUtils.secondToTime(recordParams.getSecond()));
-        this.onOrOutTime = TimeUtils.secondToTime(recordParams.getSecond() * 2);
+        this.onOrOutTime = TimeUtils.secondToTime(recordParams.getSecond());
         this.date=recordParams.getDate();
     }
 

@@ -1,5 +1,7 @@
 package com.huidi.cruise.algorithm;
 
+import com.huidi.cruise.constant.AlgorithmConstant;
+import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.domain.Record;
 
 import java.sql.Date;
@@ -36,12 +38,12 @@ public class Main {
             bigShips.add(ship);
         }
 
-        Algorithm m = new Algorithm(new Date(System.currentTimeMillis()), startTime, endTime, startBerths, arriveBerths, bigShips, smallShips);
+        Algorithm m = new Algorithm(new Date(System.currentTimeMillis()), startTime, endTime, startBerths, arriveBerths, bigShips, smallShips, (int) ((int) ShipConstant.WAIT_SECOND * AlgorithmConstant.DELAYRATE));
 
-        ArrayList<ArrayList<Record>> recordsList = m.findMax()/*m.findOpt(5500)*/;
+        ArrayList<ArrayList<Record>> recordsList = m.findMax(30000)/*m.findOpt(5500)*/;
 
 
-        for (Record backRecord : recordsList.get(0)) {
+        for (Record backRecord : recordsList.get(1)) {
             System.out.println(backRecord);
         }
         //仅仅来或者回的客流量
@@ -76,7 +78,7 @@ public class Main {
             if (i % 4 == 0) System.out.println();
         }
         System.out.println();
-        System.out.println("qian:" + recordsList.get(0).stream().mapToInt(e -> e.getShipTraffic()).sum());
+        System.out.println("qian:" + recordsList.get(1).stream().mapToInt(e -> e.getShipTraffic()).sum());
 
 
 //        System.out.println("hou:"+newRecords2.stream().mapToInt(e -> e.getShipTraffic()).sum());

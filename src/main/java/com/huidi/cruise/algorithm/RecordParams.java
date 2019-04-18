@@ -24,7 +24,9 @@ public class RecordParams {
         this.ship = ship;
         this.shipTraffic=shipTraffic;
         this.delayTime = delayTime;
+
         this.startTime = startTime;
+        this.date = date;
     }
 }
 
