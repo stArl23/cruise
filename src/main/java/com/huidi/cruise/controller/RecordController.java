@@ -56,22 +56,35 @@ public class RecordController {
         }
 
 
-        List<Record> goIslandList = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
-        List<Record> goBackList = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
-        List<Record> records = new ArrayList<>();
-        records.addAll(goIslandList);
-        records.addAll(goBackList);
+        ArrayList<Record> goIslandList = (ArrayList<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        ArrayList<Record> goBackList = (ArrayList<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+
         //load data from cache
-        if (Objects.isNull(records) || records.isEmpty()) {
-            records = recordService.listRecords(new Date(System.currentTimeMillis()).toString());
-        }
-
-
-        //load data from database
+        List<Record> records = new ArrayList<>();
         ArrayList<ArrayList<Record>> recordsList = new ArrayList<>();
-        if (Objects.isNull(records) || records.isEmpty()) {
-            records = recordService.listRecords(new Date(System.currentTimeMillis()).toString());
+        if (Objects.isNull(goIslandList) || goIslandList.isEmpty() || Objects.isNull(goBackList) || goBackList.isEmpty()) {
+            //load data from database
+            records = recordService.listRecords(form.getDate());
+            if (Objects.nonNull(records) && !records.isEmpty()) {
+                for (Record record : records) {
+                    if (record.getStartBerth() <= BerthConstant.DEVIDED) {
+                        goIslandList.add(record);
+                    } else {
+                        goBackList.add(record);
+                    }
+                }
+
+                goIslandList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
+                goBackList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
+                recordsList.add(0, goIslandList);
+                recordsList.add(0, goBackList);
+            }
+
         }
+
+
+
+
         //generate records
         if (Objects.isNull(records) || records.isEmpty()) {
             recordsList = recordService.drainage(form);
