@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum UserEnums {
-    USER_NO_FOUND(80, "user no find");
+    USER_NO_FOUND(80, "user no find"),
+    LOGIN_ERROR(81,"username or password incorrect");
     private Integer id;
     private String message;
 

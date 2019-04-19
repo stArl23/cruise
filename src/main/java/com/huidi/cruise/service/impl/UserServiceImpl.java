@@ -23,6 +23,8 @@ public class UserServiceImpl implements UserService {
             throw new UserException(UserEnums.USER_NO_FOUND.getId(), UserEnums.USER_NO_FOUND.getMessage());
         //encode password
         password = MathUtils.encode(password);
-        return (Objects.equals(password, user.getPassword())) ? user.getUsername() : null;
+        if(Objects.isNull(password)||password.equals(user.getPassword()))
+            throw new UserException(UserEnums.LOGIN_ERROR.getId(),UserEnums.LOGIN_ERROR.getMessage());
+        return user.getUsername();
     }
 }
