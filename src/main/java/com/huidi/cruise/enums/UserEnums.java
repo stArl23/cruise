@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum UserEnums {
-    USER_NO_FOUND(80, "用户未找到");
+    USER_NO_FOUND(80, "user no find");
     private Integer id;
     private String message;
 

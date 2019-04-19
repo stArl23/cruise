@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum CommonEnums {
-    PARAM_INVALID(50, "参数有误"),
-    OBJECT_NULL(51, "对象为空");
+    PARAM_INVALID(50, "parameters invalid"),
+    OBJECT_NULL(51, "object is null");
 
     private Integer id;
     private String message;

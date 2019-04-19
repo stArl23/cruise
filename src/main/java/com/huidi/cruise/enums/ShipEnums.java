@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ShipEnums {
-    SHIP_NO_FOUND(70, "找不到船只"),
-    SHIP_EXISTS(71, "船只已存在");
+    SHIP_NO_FOUND(70, "ship no find"),
+    SHIP_EXISTS(71, "ship is already existed");
     private Integer id;
     private String message;
 

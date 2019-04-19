@@ -1,19 +1,25 @@
 
 package com.huidi.cruise.VO;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.huidi.cruise.dto.RecordDto;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class RecordsVO {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class RecordsVO implements Serializable {
+
+    private static final long serialVersionUID = 3068737394742385883L;
 
     private String date;
-    private Boolean weather;
-    private Boolean isGoldenWeek;
+    private boolean weather;
+    private boolean isGoldenWeek;
     //营业时间
     private String hours;
-    private Integer traffic;
-    private Integer timeForSailing;
+    private int traffic;
+    private int timeForSailing;
 
     private Integer bigShipNumber;
     private Integer bigShipTraffic;

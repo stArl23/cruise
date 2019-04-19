@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum BerthEnums {
-    ONE_SIDE_BERTHS_UNAVAILABLE(60, "一侧码头不能全不可用"),
-    BERTH_NO_FOUND(61, "码头未找到");
+    ONE_SIDE_BERTHS_UNAVAILABLE(60, "one side berth is unavailable"),
+    BERTH_NO_FOUND(61, "berth no find");
     private Integer id;
     private String message;
 

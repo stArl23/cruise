@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum RecordEnums {
-    RECORD_NOT_EXIST(80, "记录不存在"),
-    RECORD_NOT_CREATE(81,"记录未被创建，请先排航");
+    RECORD_NOT_EXIST(80, "record not exist"),
+    RECORD_NOT_CREATE(81, "records are not created and run the create method firstly");
     private Integer id;
     private String message;
 

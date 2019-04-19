@@ -17,7 +17,6 @@ import com.huidi.cruise.utils.CacheUtils;
 import com.huidi.cruise.utils.PageVOUtils;
 import com.huidi.cruise.utils.RecordsVOutils;
 import com.huidi.cruise.utils.ResultVOUtils;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +31,6 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/records")
-@Api(value = "RecordController", description = "the api of records")
 public class RecordController {
 
     @Autowired
@@ -103,7 +101,7 @@ public class RecordController {
 
 
     @GetMapping("/list")
-    public ResultVO<RecordDto> list(@RequestParam("date") String date, @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum, @RequestParam(name = "isBack", defaultValue = "0") Integer isBack) {
+    public ResultVO<RecordDto> list(@RequestParam("date") String date, @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize, @RequestParam(name = "pageNum", defaultValue = "1", required = false) Integer pageNum, @RequestParam(name = "isBack", defaultValue = "0", required = false) Integer isBack) {
         List<Record> records;
         if (isBack == 1) {
             records = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
@@ -140,8 +138,8 @@ public class RecordController {
     }
 
 
-    @PostMapping("/delete")
-    public ResultVO delete(@RequestParam("id") String id, @RequestParam("isBack") Integer isBack) {
+    @GetMapping("/delete")
+    public ResultVO delete(@RequestParam("id") String id, @RequestParam(value = "isBack") Integer isBack) {
         //recordService.deleteRecord(id);
         List<Record> records = (List<Record>) (isBack == 1 ? CacheUtils.getObject(RecordConstant.GOBACKRECORDS) : CacheUtils.getObject(RecordConstant.GOISLANDRECORDS));
         if (Objects.isNull(records) || records.isEmpty()) {

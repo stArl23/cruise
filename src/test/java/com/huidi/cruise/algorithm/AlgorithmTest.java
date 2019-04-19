@@ -1,4 +1,6 @@
 package com.huidi.cruise.algorithm;
+
+import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.domain.Record;
 import com.huidi.cruise.repository.RecordRepository;
 import org.junit.Test;
@@ -46,7 +48,7 @@ public class AlgorithmTest {
             Ship ship=new Ship("B"+String.valueOf(i),200);
             bigShips.add(ship);
         }
-        algorithm = new Algorithm(new Date(System.currentTimeMillis()), Time.valueOf("7:00:00"), Time.valueOf("18:00:00"), startBerthAlgorithms, arriveBerthAlgorithms, bigShips, smallShips);
+        algorithm = new Algorithm(new Date(System.currentTimeMillis()), Time.valueOf("7:00:00"), Time.valueOf("18:00:00"), startBerthAlgorithms, arriveBerthAlgorithms, bigShips, smallShips, ShipConstant.WAIT_SECOND);
     }
 
     @Test

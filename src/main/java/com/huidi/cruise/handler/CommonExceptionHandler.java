@@ -35,7 +35,7 @@ public class CommonExceptionHandler {
         return ResultVOUtils.error(ex.getId(), ex.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(value = CommonException.class)
     @ResponseBody
     public ResultVO handlerException(CommonException ex){
         return ResultVOUtils.error(ex.getId(), ex.getMessage());

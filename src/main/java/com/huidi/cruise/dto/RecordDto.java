@@ -4,10 +4,12 @@ package com.huidi.cruise.dto;
 import com.huidi.cruise.utils.interfaces.Excelable;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.sql.Time;
 
 @Data
-public class RecordDto implements Excelable {
+public class RecordDto implements Excelable, Serializable {
+    private static final long serialVersionUID = 3068737394742385813L;
     private String id;
     private String arriveBerthTime;
     private String arriveTime;

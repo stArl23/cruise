@@ -13,6 +13,7 @@ public class CommonException extends RuntimeException {
 
     public CommonException(Integer id, String message) {
         super(message);
+        this.message = message;
         this.id = id;
     }
 

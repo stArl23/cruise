@@ -1,17 +1,22 @@
 package com.huidi.cruise.VO;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
+//empty or null field are not presented
 @Data
-public class PageVO<T> {
-    Integer pageNum;
-    Integer pageSize;
-    Integer totalPage;
-    Integer firstPage;
-    Integer lastPage;
-    List<T> data;
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class PageVO<T> implements Serializable {
+    private static final long serialVersionUID = 3068637394742385883L;
+    private int pageNum;
+    private int pageSize;
+    private int totalPage;
+    private int firstPage;
+    private int lastPage;
+    private List<T> data;
 
     public PageVO(List<T> data) {
         this.pageNum = 1;
