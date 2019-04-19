@@ -18,11 +18,7 @@ import com.huidi.cruise.utils.PageVOUtils;
 import com.huidi.cruise.utils.RecordsVOutils;
 import com.huidi.cruise.utils.ResultVOUtils;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -107,13 +103,7 @@ public class RecordController {
 
 
     @GetMapping("/list")
-    @ApiOperation(value = "list records by date", notes = "list records by date", httpMethod = "GET", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "String", name = "date", value = "date", required = true),
-    })
     public ResultVO<RecordDto> list(@RequestParam("date") String date, @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, @RequestParam(name = "pageNum", defaultValue = "1") Integer pageNum, @RequestParam(name = "isBack", defaultValue = "0") Integer isBack) {
-
-
         List<Record> records;
         if (isBack == 1) {
             records = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
@@ -150,11 +140,7 @@ public class RecordController {
     }
 
 
-    @GetMapping("/delete")
-    @ApiOperation(value = "list records by id", notes = "list records by id", httpMethod = "GET", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "String", name = "id", value = "id", required = true),
-    })
+    @PostMapping("/delete")
     public ResultVO delete(@RequestParam("id") String id, @RequestParam("isBack") Integer isBack) {
         //recordService.deleteRecord(id);
         List<Record> records = (List<Record>) (isBack == 1 ? CacheUtils.getObject(RecordConstant.GOBACKRECORDS) : CacheUtils.getObject(RecordConstant.GOISLANDRECORDS));

@@ -10,12 +10,7 @@ import com.huidi.cruise.form.LoginForm;
 import com.huidi.cruise.service.UserService;
 import com.huidi.cruise.utils.CookieUtil;
 import com.huidi.cruise.utils.ResultVOUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,13 +22,11 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
-@Api(value="UserController",description ="the api of users" )
 public class UserController {
     @Autowired
     private UserService userService;
 
     @PostMapping("/login")
-    @ApiOperation(value="user login",notes = " user login, add username to cookie",httpMethod = "POST",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResultVO<String> login(@Valid LoginForm loginForm, BindingResult bindingResult, HttpServletResponse response) {
         if (bindingResult.hasErrors()) {
             throw new CommonException(CommonEnums.PARAM_INVALID.getId()
@@ -53,10 +46,6 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    @ApiOperation(value="user logout",notes = " user logout, delete username from cookie",httpMethod = "GET",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType="String", name = "username", value = "username of user", required = true),
-    })
     public ResultVO logout(@RequestParam("username") String username, HttpServletRequest request, HttpServletResponse response) {
         //get cookie
         if (Objects.isNull(username))
