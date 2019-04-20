@@ -7,15 +7,13 @@ import com.huidi.cruise.service.ShipService;
 import com.huidi.cruise.utils.ResultVOUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 
-@RestController("/ship")
+@RestController
+@RequestMapping("/ship")
 public class ShipController {
 
     @Autowired
