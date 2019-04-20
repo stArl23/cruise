@@ -65,7 +65,7 @@ jar {
 
 //清除上次的编译过的文件
 task clearPj(type:Delete){
-    delete 'build','target'
+    delete 'build','target',"out"
 }
 
 task copyJar(type:Copy){
