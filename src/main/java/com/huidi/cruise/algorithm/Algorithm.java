@@ -2,6 +2,7 @@ package com.huidi.cruise.algorithm;
 
 import com.huidi.cruise.algorithm.model.Model;
 import com.huidi.cruise.constant.AlgorithmConstant;
+import com.huidi.cruise.constant.BerthConstant;
 import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.domain.Record;
 import com.huidi.cruise.utils.TimeUtils;
@@ -28,9 +29,14 @@ public class Algorithm {
     private Time startTime;
     private Time endTime;
     private Time loopInterval;
+    private int back_order;
+    private int order;
 
 
     public Algorithm(java.sql.Date date, Time startTime, Time endTime, ArrayList<Berth> startBerths, ArrayList<Berth> arriveBerths, ArrayList<Ship> bigShips, ArrayList<Ship> smallShips, Integer wait_second) {
+        back_order = 0;
+        order = 0;
+
         berthMap = new HashMap<>();
         berths = new ArrayList<>();
         this.startTime = startTime;
@@ -51,7 +57,15 @@ public class Algorithm {
             berthMap.put(berth.getName(), berth);
         }
 
-        this.shipComparator = Comparator.comparingInt(o -> o.getPriority() * o.getFreq());
+        this.shipComparator = (o1, o2) -> {
+            if (o1.getFreq() * o1.getPriority() > o2.getFreq() * o2.getPriority()) {
+                return 1;
+            } else if (o1.getFreq() * o1.getPriority() < o2.getFreq() * o2.getPriority()) {
+                return -1;
+            } else {
+                return Integer.parseInt(o1.getName()) > Integer.parseInt(o2.getName()) ? 1 : -1;
+            }
+        };
         this.ships = new Heap<>(this.bigShips.size() + this.smallShips.size(), shipComparator);
         this.shipsWaiting = new Heap<>(this.bigShips.size() + this.smallShips.size(), shipComparator);
 
@@ -182,17 +196,80 @@ public class Algorithm {
         return true;
     }
 
+    private void berthFilter(ArrayList<ArrayList<Record>> records, int wait_second) {
+        /*        ArrayList<Record> t_list=new ArrayList<>();*/
+        int d_num = 0;
+        ArrayList<Record> recordList = new ArrayList<>();
+        recordList.addAll(records.get(0));
+        recordList.addAll(records.get(1));
+
+        recordList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
+
+        Set<String> delete_set = new HashSet<>();
+        for (int i = 0; i < berths.size(); i++) {
+            ArrayList<Record> tempList = new ArrayList<>();
+            for (Record record : recordList) {
+                if (record.getStartBerth().equals(Integer.parseInt(berths.get(i).getName()))
+                        || record.getArriveBerth().equals(Integer.parseInt(berths.get(i).getName()))) {
+                    tempList.add(record);
+                }
+            }
+
+            for (int j = 0; j < tempList.size(); j++) {
+                for (int k = j + 1; k < tempList.size(); k++) {
+                    Time t = TimeUtils.timeOperation("-", tempList.get(k).getStartTime(), tempList.get(j).getArriveTime());
+                    if (tempList.get(j).getArriveBerth().equals(tempList.get(k).getStartBerth()) && TimeUtils.timeToSecond(t) < wait_second) {
+                        d_num++;
+                        Record toRecord = tempList.get(j).getStartBerth() <= BerthConstant.DEVIDED ? tempList.get(j) : tempList.get(k);
+                        Record backRecord = tempList.get(j).getStartBerth() > BerthConstant.DEVIDED ? tempList.get(j) : tempList.get(k);
+                        if (d_num % 2 == 0) {
+                            delete_set.add(toRecord.getId());
+                        } else {
+                            delete_set.add(backRecord.getId());
+                        }
+                    }
+                }
+            }
+        }
+
+        ArrayList<Record> goIslandList = new ArrayList<>();
+        ArrayList<Record> goBackList = new ArrayList<>();
+        for (Record record : recordList) {
+            if (delete_set.contains(record.getId())) continue;
+            if (record.getStartBerth() <= BerthConstant.DEVIDED) {
+                goIslandList.add(record);
+            } else {
+                goBackList.add(record);
+            }
+        }
+
+        records.set(0, new ArrayList<>(goIslandList));
+        records.set(1, new ArrayList<>(goBackList));
+    }
+
+    //use new choose policy
     /**
      * Basic findOpt
-     * 返回来和回的序列，使用共同堆
+     * 返回来和回的序列，使用大小船单独堆 3小船1大船确保
      * @param number
      * @return
      */
     //目前最大13300
     //bug 1 最大的问题就是两个 loop之间，如果前面最后一班出发时间和第二个loop的第一班出发时间撞车
     public ArrayList<ArrayList<Record>> findOpt(int number) {
+        back_order = 0;
+        order = 0;
         //prepare data
-        updateShips(ships, AlgorithmConstant.STANDRATE);
+        //updateShips(ships, AlgorithmConstant.STANDRATE);
+        Heap<Ship> bigShipHeap, smallShipHeap, bigWaitingShipHeap, smallWaitingShipHeap;
+        bigShipHeap = new Heap<>(this.bigShips.size(), shipComparator);
+        smallShipHeap = new Heap<>(this.smallShips.size(), shipComparator);
+        bigWaitingShipHeap = new Heap<>(this.bigShips.size(), shipComparator);
+        smallWaitingShipHeap = new Heap<>(this.smallShips.size(), shipComparator);
+
+        updateBigShip(bigShipHeap, AlgorithmConstant.STANDRATE);
+        updateSmallShip(smallShipHeap, AlgorithmConstant.STANDRATE);
+
         updateBerths();
         ArrayList<ArrayList<Record>> records = new ArrayList<>();
         updateRecords(records, new ArrayList<>(), new ArrayList<>());
@@ -229,16 +306,19 @@ public class Algorithm {
             //当客运量满足需求或者船只全部用尽
             Time bound = TimeUtils.timeOperation("+", loopInterval, start);
             bound = TimeUtils.timeOperation("-", bound, TimeUtils.secondToTime(wait_second));
-            while (toNumber < toPrediction && !ships.isEmpty()) {
+            while (toNumber < toPrediction && /*!ships.isEmpty()*/(!bigShipHeap.isEmpty() || !smallShipHeap.isEmpty())) {
                 //保证正确性，最后一艘出发时间超过下一个loop开始时间的航班直接取消
-                Ship ship = (Ship) ships.peek();
+                //Ship ship = (Ship) ships.peek();
+                Ship ship = (Ship) d_ship(bigShipHeap, smallShipHeap, false);
                 if (!Objects.isNull(ship.getLateTime()) && ship.getLateTime().after(startTimeTemp)) {
                     startTimeTemp = ship.getLateTime();
                 }
                 if (equalOrAfter(bound, startTimeTemp)) break;
-                ship = getShip(ships);
+                //ship = getShip(ships);
+                ship = getShip(ship, bigShipHeap, smallShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY, false);
                 //add to wait queue
-                shipsWaiting.add(ship);
+                addWaitingQueue(ship, bigWaitingShipHeap, smallWaitingShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY);
+                //shipsWaiting.add(ship);
 
                 startTimeTemp = getGoList(startTimeTemp, goIslandList, ship, true);
 
@@ -252,31 +332,36 @@ public class Algorithm {
                 //保证正确性，最后一艘出发时间超过下一个loop开始时间的航班直接取消
                 Ship ship;
                 //考虑岛内没有船 需空跑
-                if (shipsWaiting.isEmpty()) {
-                    ship = (Ship) ships.peek();
+                if (/*shipsWaiting.isEmpty()*/bigWaitingShipHeap.isEmpty() && smallWaitingShipHeap.isEmpty()) {
+                    //ship = (Ship) ships.peek();
+                    ship = d_ship(bigShipHeap, smallShipHeap, false);
                     if (!Objects.isNull(ship.getLateTime()) && ship.getLateTime().after(startTimeTemp)) {
                         startTimeTemp = ship.getLateTime();
                     }
                     startTimeTemp = directGo(backTimeTemp, ship, bound);
                     //末尾处理
                     if (equalOrAfter(bound, startTimeTemp)) break;
-                    ship = getShip(ships);
+                    //ship = getShip(ships);
+                    ship = getShip(ship, bigShipHeap, smallShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY, false);
                     //18分20秒左右 相当于趟海路加上停泊上下船的
                     backTimeTemp = TimeUtils.timeOperation("+", startTimeTemp, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND + wait_second));//TODO
                     startTimeTemp = TimeUtils.timeOperation("+", startTimeTemp, interval);
                 } else {
-                    ship = (Ship) shipsWaiting.peek();
+                    // ship = (Ship) shipsWaiting.peek();
+                    ship = d_ship(bigWaitingShipHeap, smallWaitingShipHeap, true);
                     if (!Objects.isNull(ship.getLateTime()) && ship.getLateTime().after(backTimeTemp)) {
                         backTimeTemp = ship.getLateTime();
                     }
                     //末尾处理
                     if (equalOrAfter(bound, backTimeTemp)) break;
-                    ship = getShip(shipsWaiting);
+                    //ship = getShip(shipsWaiting);
+                    ship = getShip(ship, bigWaitingShipHeap, smallWaitingShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY, true);
                 }
 
                 backNumber += ship.getCapability();
                 //total_back_traffic+=ship.getCapability();
-                ships.add(ship);
+                //ships.add(ship);
+                addWaitingQueue(ship, bigShipHeap, smallShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY);
                 backTimeTemp = getGoList(backTimeTemp, goBackList, ship, false);
                 backTimeTemp = TimeUtils.timeOperation("+", backTimeTemp, interval);
             }
@@ -290,21 +375,26 @@ public class Algorithm {
         total_back_traffic = records.get(1).stream().mapToInt(e -> e.getShipTraffic()).sum();
         while (total_back_traffic < num1) {
             Ship ship;
-            if (shipsWaiting.isEmpty()) {
-                ship = getShip(ships);
+            if (/*shipsWaiting.isEmpty()*/bigWaitingShipHeap.isEmpty() && smallWaitingShipHeap.isEmpty()) {
+                //ship = getShip(ships);
+                ship = d_ship(bigShipHeap, smallShipHeap, true);
+                ship = getShip(ship, bigShipHeap, smallShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY, true);
                 if (!Objects.isNull(ship.getLateTime()) && ship.getLateTime().after(startTimeTemp))
                     startTimeTemp = ship.getLateTime();
                 startTimeTemp = directGo(backTimeTemp, ship, bound);
                 backTimeTemp = TimeUtils.timeOperation("+", startTimeTemp, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND + wait_second));//TODO
                 startTimeTemp = TimeUtils.timeOperation("+", startTimeTemp, interval);
             } else {
-                ship = getShip(shipsWaiting);
+                //ship = getShip(shipsWaiting);
+                ship = d_ship(bigWaitingShipHeap, smallWaitingShipHeap, true);
+                ship = getShip(ship, bigWaitingShipHeap, smallWaitingShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY, true);
                 if (!Objects.isNull(ship.getLateTime()) && ship.getLateTime().after(backTimeTemp)) {
                     backTimeTemp = ship.getLateTime();
                 }
             }
             total_back_traffic += ship.getCapability();
-            ships.add(ship);
+            //ships.add(ship);
+            addWaitingQueue(ship, bigShipHeap, smallShipHeap, ShipConstant.BIGSHIPCAPABILITY, ShipConstant.SMALLSHIPCAPABILITY);
             backTimeTemp = getGoList(backTimeTemp, goBackList, ship, false);
             backTimeTemp = TimeUtils.timeOperation("+", backTimeTemp, interval);
         }
@@ -314,6 +404,8 @@ public class Algorithm {
             //recordsList.add((ArrayList<ArrayList<Record>>) records.clone());
             timeFilter(records);
         }
+
+        berthFilter(records, wait_second);
         return records;
     }
 
@@ -460,7 +552,7 @@ public class Algorithm {
         Time start = startTime;
         Time startTimeTemp = start;
         Time backTimeTemp = start;
-        Time actuall_backTime = TimeUtils.timeOperation("+", startTime, TimeUtils.secondToTime(AlgorithmConstant.LOOP_SECOND * 2));
+        Time actual_backTime = TimeUtils.timeOperation("+", startTime, TimeUtils.secondToTime(AlgorithmConstant.LOOP_SECOND * 2));
 
         for (int i = 0; i < loopNumber; i++) {
             int toNumber = 0;
@@ -477,8 +569,8 @@ public class Algorithm {
 
             startTimeTemp = start;
             backTimeTemp = start;
-            int t = (AlgorithmConstant.LOOP_SECOND / (numOfEachLoop / 100)) / 60 * 60;
-            Time interval = TimeUtils.secondToTime(t > 60 ? t : 60);
+            int t = /*AlgorithmConstant.LOOP_SECOND-ShipConstant.IN_SEA_SECOND-*/wait_second;
+            Time interval = TimeUtils.secondToTime(t / 2/*(numOfEachLoop/ShipConstant.AVG_SHIP_CUSTOMERS)*/);
             //generate
             //当客运量满足需求或者船只全部用尽
             Time bound = TimeUtils.timeOperation("+", loopInterval, start);
@@ -503,7 +595,7 @@ public class Algorithm {
             }
 
             backTimeTemp = start;
-            while (backNumber < backPrediction && equalOrAfter(actuall_backTime, backTimeTemp)) {
+            while (backNumber < backPrediction && equalOrAfter(actual_backTime, backTimeTemp)) {
                 //保证正确性，最后一艘出发时间超过下一个loop开始时间的航班直接取消
                 Ship ship;
                 //考虑岛内没有船 需空跑
@@ -568,6 +660,8 @@ public class Algorithm {
         while (!testTimeFilter(records)) {
             timeFilter(records);
         }
+        //filter with wait_second
+        berthFilter(records, wait_second);
         return records;
     }
 
@@ -597,8 +691,45 @@ public class Algorithm {
         }
     }
 
+    /**
+     * return ship with 3 small ship and 1 big ship
+     *
+     * @param b_ship  big ship heap
+     * @param s_ship  small ship heap
+     * @param is_back go back or not go back
+     * @return return will be chosen
+     */
+    private Ship d_ship(Heap<Ship> b_ship, Heap<Ship> s_ship, boolean is_back) {
+
+        if (b_ship.isEmpty()) return (Ship) s_ship.peek();
+        else if (s_ship.isEmpty()) return (Ship) b_ship.peek();
+        else {
+            if (is_back) {
+                return (Ship) ((back_order + 1) % 4 == 0 ? b_ship.peek() : s_ship.peek());
+            } else {
+                return (Ship) ((order + 1) % 4 == 0 ? b_ship.peek() : s_ship.peek());
+            }
+        }
+    }
+
     private Ship getShip(Ship ship, Heap<Ship> bigShips, Heap<Ship> smallShips, int bigCapability, int smallCapability) {
         Ship ship1;
+        if (ship.getCapability().equals(bigCapability)) {
+            ship1 = getShip(bigShips);
+        } else {
+            ship1 = getShip(smallShips);
+        }
+        return ship1;
+    }
+
+    private Ship getShip(Ship ship, Heap<Ship> bigShips, Heap<Ship> smallShips, int bigCapability, int smallCapability, boolean isBack) {
+        Ship ship1;
+        if (isBack) {
+            back_order++;
+        } else {
+            order++;
+        }
+
         if (ship.getCapability().equals(bigCapability)) {
             ship1 = getShip(bigShips);
         } else {
@@ -694,18 +825,32 @@ public class Algorithm {
             arriveBerth = findBerth(startBerths, earlyArriveBusyTime, lateArriveBusyTime);
         }
 
-        Time delayTime1 = getDelayTime(earlyStartBusyTime, lateStartBusyTime, startTimeTemp, TimeUtils.secondToTime(wait_second), startBerth);
-        setTimeBoundary(earlyStartBusyTime, lateStartBusyTime, startTimeTemp, TimeUtils.secondToTime(wait_second), startBerth);
-        Time delayTime2 = getDelayTime(earlyArriveBusyTime, lateArriveBusyTime, startTimeTemp, TimeUtils.secondToTime(wait_second), arriveBerth);
-        setTimeBoundary(earlyArriveBusyTime, lateArriveBusyTime, startTimeTemp, TimeUtils.secondToTime(wait_second), arriveBerth);
+        Time startTimeTemp1 = startTimeTemp;
 
-        if (delayTime1.after(startTimeTemp) && delayTime1.after(delayTime2)) {
+        Time delayTime1 = getDelayTime(earlyStartBusyTime, lateStartBusyTime, startTimeTemp, TimeUtils.secondToTime(wait_second), startBerth);
+        if (delayTime1.after(startTimeTemp)) startTimeTemp = delayTime1;
+
+        Time levelTimeTemp = TimeUtils.timeOperation("+", startTimeTemp, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND));
+        Time delayTime2 = getDelayTime(earlyArriveBusyTime, lateArriveBusyTime, levelTimeTemp, TimeUtils.secondToTime(wait_second), arriveBerth);
+        if (TimeUtils.timeOperation("-", delayTime2, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND)).after(startTimeTemp))
+            startTimeTemp = TimeUtils.timeOperation("-", delayTime2, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND));
+
+        if (startTimeTemp.after(startTimeTemp1)) {
+            earlyStartBusyTime = TimeUtils.timeOperation("-", startTimeTemp, TimeUtils.secondToTime(wait_second));
+            lateStartBusyTime = startTimeTemp;
+            earlyArriveBusyTime = TimeUtils.timeOperation("+", startTimeTemp, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND));
+            lateArriveBusyTime = TimeUtils.timeOperation("+", startTimeTemp, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND + wait_second));
+        }
+
+        setTimeBoundary(earlyStartBusyTime, lateStartBusyTime, startTimeTemp, TimeUtils.secondToTime(wait_second), startBerth);
+        setTimeBoundary(earlyArriveBusyTime, lateArriveBusyTime, startTimeTemp, TimeUtils.secondToTime(wait_second), arriveBerth);
+        /*if (delayTime1.after(startTimeTemp) && delayTime1.after(delayTime2)) {
             startTimeTemp = delayTime1;
         } else if (delayTime2.after(startTimeTemp)) {
             startTimeTemp = delayTime2;
             startBerth.setEarlyBusyTime(TimeUtils.timeOperation("-", delayTime2, TimeUtils.secondToTime(wait_second)));
             startBerth.setLateBusyTime(delayTime2);
-        }
+        }*/
 
         RecordParams recordParams = new RecordParams(startBerth, arriveBerth, wait_second, ship, ship.getCapability(), delayTime2, startTimeTemp, date);
         Record record1 = new Record(recordParams);

@@ -191,12 +191,16 @@ public class RecordController {
 
     @GetMapping("/publish")
     public ResultVO publish(){
+
+        List<Record> records = recordService.listRecords(new Date(System.currentTimeMillis()).toString());
+        if (Objects.nonNull(records) && !records.isEmpty())
+            throw new RecordException(RecordEnums.RECORD_ALREADY_PUBLISH.getId(), RecordEnums.RECORD_ALREADY_PUBLISH.getMessage());
         List<Record> goBackList = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
         List<Record> goIslandList = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
         if (Objects.isNull(goIslandList) || goIslandList.isEmpty() || Objects.isNull(goBackList) || goBackList.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(),RecordEnums.RECORD_NOT_CREATE.getMessage());
         }else{
-            List<Record> records = new ArrayList<>();
+            records = new ArrayList<>();
             records.addAll(goIslandList);
             records.addAll(goBackList);
             recordService.saveRecord(records);

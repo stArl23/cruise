@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum RecordEnums {
     RECORD_NOT_EXIST(90, "record not exist"),
-    RECORD_NOT_CREATE(91, "records are not created and run the create method firstly");
+    RECORD_NOT_CREATE(91, "records are not created and run the create method firstly"),
+    RECORD_ALREADY_PUBLISH(92, "records have already been published");
     private Integer id;
     private String message;
 

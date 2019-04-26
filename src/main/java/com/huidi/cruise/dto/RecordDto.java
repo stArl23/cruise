@@ -11,12 +11,13 @@ import java.sql.Time;
 public class RecordDto implements Excelable, Serializable {
     private static final long serialVersionUID = 3068737394742385813L;
     private String id;
-    private String arriveBerthTime;
-    private String arriveTime;
+
     private String shipName;
     private String startBerth;
     private String arriveBerth;
     private String startTime;
+    private String arriveTime;
+    private String arriveBerthTime;
     private String timeForSailing;
     private String waitTime;
 

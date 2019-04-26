@@ -46,7 +46,7 @@ public class Record implements Serializable{
         this.arriveBerth = Integer.valueOf(recordParams.getArriveBerth().getName());
         this.shipName=recordParams.getShip().getName();
         this.shipTraffic=recordParams.getShipTraffic();
-        this.startTime=recordParams.getDelayTime().after(recordParams.getStartTime())?recordParams.getDelayTime():recordParams.getStartTime();
+        this.startTime = recordParams.getStartBerth().getLateBusyTime();
         //this.arriveTime=Algorithm.timeOperation("-",recordParams.getArriveBerthAlgorithm().getEarlyBusyTime(),Algorithm.secondToTime(recordParams.getSecond()));
         this.arriveTime = recordParams.getArriveBerth().getEarlyBusyTime();
         this.totalTime = TimeUtils.timeOperation("+", TimeUtils.timeOperation("-", this.arriveTime, this.startTime), TimeUtils.secondToTime(recordParams.getSecond()));

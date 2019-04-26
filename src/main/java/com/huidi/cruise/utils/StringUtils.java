@@ -1,6 +1,7 @@
 package com.huidi.cruise.utils;
 
 import com.huidi.cruise.constant.BerthConstant;
+import com.huidi.cruise.constant.ShipConstant;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,6 +109,26 @@ public class StringUtils extends org.springframework.util.StringUtils {
     }
 
 
+    public static String getShipName(Integer sNumber) {
+        String name = "";
+        if (sNumber >= ShipConstant.DEVIDED) {
+            name = ShipConstant.BIGSHIP + (sNumber - ShipConstant.DEVIDED);
+        } else {
+            name = ShipConstant.SMALLSHIP + sNumber;
+        }
+        return name;
+    }
+
+    public static int getShipId(String name) {
+        int result = 0;
+        if (ShipConstant.BIGSHIP.equals(name.substring(0, 1))) {
+            result = Integer.parseInt(name.substring(1, 2));
+        } else {
+            result = Integer.parseInt(name.substring(1, 2)) + ShipConstant.DEVIDED;
+        }
+        return result;
+    }
+
     public static String getBerthName(Integer sNumber) {
         String name = "";
         if (sNumber > BerthConstant.DEVIDED) {
@@ -119,6 +140,7 @@ public class StringUtils extends org.springframework.util.StringUtils {
         }
         return name;
     }
+
 
     public static Integer getBerthId(String name){
         String constant=name.substring(0,2);
