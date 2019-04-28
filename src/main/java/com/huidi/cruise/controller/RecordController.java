@@ -71,7 +71,7 @@ public class RecordController {
                 goIslandList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
                 goBackList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
                 recordsList.add(0, goIslandList);
-                recordsList.add(0, goBackList);
+                recordsList.add(1, goBackList);
             }
 
         }

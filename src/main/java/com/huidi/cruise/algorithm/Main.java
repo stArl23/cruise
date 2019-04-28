@@ -1,5 +1,4 @@
 package com.huidi.cruise.algorithm;
-
 import com.huidi.cruise.constant.AlgorithmConstant;
 import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.converter.Record2RecordDto;
@@ -11,6 +10,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -49,7 +50,7 @@ public class Main {
 
         Algorithm m = new Algorithm(new Date(System.currentTimeMillis()), startTime, endTime, startBerths, arriveBerths, bigShips, smallShips, (int) ((int) ShipConstant.WAIT_SECOND * AlgorithmConstant.DELAYRATE));
 
-        ArrayList<ArrayList<Record>> recordsList = /*m.findMax(25000)*/m.findOpt(5500);
+        ArrayList<ArrayList<Record>> recordsList = m.findMax(25000)/*m.findOpt(5500)*/;
 
 
         for (Record backRecord : recordsList.get(0)) {
@@ -166,13 +167,13 @@ public class Main {
             cell.setCellValue(result[i]);
         }
 
-        /*try {
+        try {
             File file=new File("."+File.separatorChar+"doc"+File.separatorChar + "findMax(25000)"+new Date(System.currentTimeMillis()).toString() + ".xls");
             file.createNewFile();
             hssfWorkbook.write(file);
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
 
 //        System.out.println("hou:"+newRecords2.stream().mapToInt(e -> e.getShipTraffic()).sum());
 
