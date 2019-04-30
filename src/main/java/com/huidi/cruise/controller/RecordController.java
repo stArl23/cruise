@@ -56,10 +56,21 @@ public class RecordController {
         //load data from cache
         List<Record> records = new ArrayList<>();
         ArrayList<ArrayList<Record>> recordsList = new ArrayList<>();
-        if (Objects.isNull(goIslandList) || goIslandList.isEmpty() || Objects.isNull(goBackList) || goBackList.isEmpty()) {
-            //load data from database
+        //if either list is empty or null or date is not today,then load data from database
+        if (Objects.isNull(goIslandList) || goIslandList.isEmpty() || !goIslandList.iterator().next().getDate().equals(new Date(System.currentTimeMillis()))
+                || Objects.isNull(goBackList) || goBackList.isEmpty() || !goBackList.iterator().next().getDate().equals(new Date(System.currentTimeMillis()))) {
             records = recordService.listRecords(form.getDate());
             if (Objects.nonNull(records) && !records.isEmpty()) {
+                //clear data
+                if (Objects.nonNull(goBackList))
+                    goBackList.clear();
+                else
+                    goBackList = new ArrayList<>();
+
+                if (Objects.nonNull(goIslandList))
+                    goIslandList.clear();
+                else
+                    goIslandList = new ArrayList<>();
                 for (Record record : records) {
                     if (record.getStartBerth() <= BerthConstant.DEVIDED) {
                         goIslandList.add(record);
@@ -70,8 +81,8 @@ public class RecordController {
 
                 goIslandList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
                 goBackList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
-                recordsList.add(0, goIslandList);
-                recordsList.add(1, goBackList);
+                recordsList.set(0, goIslandList);
+                recordsList.set(1, goBackList);
             }
 
         }
@@ -83,8 +94,8 @@ public class RecordController {
         if (Objects.isNull(records) || records.isEmpty()) {
             recordsList = recordService.drainage(form);
         } else {
-            recordsList.add(0, new ArrayList<>());
-            recordsList.add(1, new ArrayList<>());
+            recordsList.set(0, new ArrayList<>());
+            recordsList.set(1, new ArrayList<>());
             for (Record record : records) {
                 if (record.getStartBerth() <= BerthConstant.DEVIDED) {
                     recordsList.get(0).add(record);
@@ -103,38 +114,64 @@ public class RecordController {
     @GetMapping("/list")
     public ResultVO<RecordDto> list(@RequestParam("date") String date, @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize, @RequestParam(name = "pageNum", defaultValue = "1", required = false) Integer pageNum, @RequestParam(name = "isBack", defaultValue = "0", required = false) Integer isBack) {
         List<Record> records;
-        if (isBack == 1) {
-            records = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
-        } else {
-            records = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
-        }
+        List<Record> goBackList, goIslandList;
+        //make return value always not null
+        goIslandList = Objects.isNull(CacheUtils.getObject(RecordConstant.GOISLANDRECORDS)) ? new ArrayList<>() : (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        goBackList = Objects.isNull(CacheUtils.getObject(RecordConstant.GOBACKRECORDS)) ? new ArrayList<>() : (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+
 
         //load data from database
-        if (Objects.isNull(records) || records.isEmpty()) {
+        if (goIslandList.isEmpty() || Objects.isNull(goBackList)) {
             records = recordService.listRecords(date);
-            List<Record> tempList = new ArrayList<>();
+            //List<Record> tempList = new ArrayList<>();
             for (Record record : records) {
                 if (isBack == 1 && record.getStartBerth() <= BerthConstant.DEVIDED) {
-                    tempList.add(record);
+                    goBackList.add(record);
                 } else if (isBack == 0 && record.getStartBerth() > BerthConstant.DEVIDED) {
-                    tempList.add(record);
+                    goIslandList.add(record);
                 }
             }
-            records = tempList;
-            records.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
+
+            goIslandList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
+            goBackList.sort((o1, o2) -> o1.getStartTime().after(o2.getStartTime()) ? 1 : -1);
         }
 
-        if (Objects.isNull(records) || records.isEmpty()) {
+        if (goBackList.isEmpty() || goIslandList.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(), RecordEnums.RECORD_NOT_CREATE.getMessage());
+        }
+
+        //only store date if date is current date
+        if (new Date(System.currentTimeMillis()).equals(Date.valueOf(date))) {
+            CacheUtils.setObject(RecordConstant.GOBACKRECORDS, goBackList);
+            CacheUtils.setObject(RecordConstant.GOISLANDRECORDS, goIslandList);
+        }
+
+        if (isBack == 1) {
+            records = goBackList;
         } else {
-            if (isBack == 1) {
-                CacheUtils.setObject(RecordConstant.GOBACKRECORDS, records);
-            } else {
-                CacheUtils.setObject(RecordConstant.GOISLANDRECORDS, records);
-            }
+            records = goIslandList;
         }
 
         return ResultVOUtils.success(PageVOUtils.page(pageNum, pageSize, Record2RecordDto.convert(records)));
+    }
+
+
+    @GetMapping("/clear")
+    public ResultVO clear() {
+        ArrayList<Record> goIslandList = Objects.isNull(CacheUtils.getObject(RecordConstant.GOISLANDRECORDS)) ? new ArrayList<>() : (ArrayList<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        ArrayList<Record> goBackList = Objects.isNull(CacheUtils.getObject(RecordConstant.GOBACKRECORDS)) ? new ArrayList<>() : (ArrayList<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+        ArrayList<Record> recordList;
+        //load date from database and delete sort date
+        if (goBackList.isEmpty() || goIslandList.isEmpty()) {
+            recordList = (ArrayList<Record>) recordService.listRecords(new Date(System.currentTimeMillis()).toString());
+            for (Record record : recordList) {
+                recordService.deleteRecord(record.getId());
+            }
+        }
+
+        CacheUtils.setObject(RecordConstant.GOBACKRECORDS, new ArrayList<>());
+        CacheUtils.setObject(RecordConstant.GOISLANDRECORDS, new ArrayList<>());
+        return ResultVOUtils.success();
     }
 
 
@@ -168,8 +205,8 @@ public class RecordController {
     @GetMapping("/excel")
     public ResultVO excel(HttpServletResponse response) {
         //only when cache contains data can be used
-        List<Record> goBackList = (List<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
-        List<Record> goIslandList = (List<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
+        List<Record> goBackList = Objects.isNull(CacheUtils.getObject(RecordConstant.GOBACKRECORDS)) ? new ArrayList<>() : (ArrayList<Record>) CacheUtils.getObject(RecordConstant.GOBACKRECORDS);
+        List<Record> goIslandList = Objects.isNull(CacheUtils.getObject(RecordConstant.GOISLANDRECORDS)) ? new ArrayList<>() : (ArrayList<Record>) CacheUtils.getObject(RecordConstant.GOISLANDRECORDS);
         List<Record> records = new ArrayList<>();
         if (Objects.isNull(goIslandList) || goIslandList.isEmpty() || Objects.isNull(goBackList) || goBackList.isEmpty()) {
             throw new RecordException(RecordEnums.RECORD_NOT_CREATE.getId(), RecordEnums.RECORD_NOT_CREATE.getMessage());

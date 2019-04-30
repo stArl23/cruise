@@ -12,7 +12,7 @@ public class ResultVOUtils {
         ResultVO resultVO = new ResultVO();
         resultVO.setData(object);
         resultVO.setCode(0);
-        resultVO.setMsg("成功");
+        resultVO.setMsg("success");
         return resultVO;
     }
 

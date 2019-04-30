@@ -1,17 +1,17 @@
 package com.huidi.cruise.algorithm;
+
 import com.huidi.cruise.constant.AlgorithmConstant;
 import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.converter.Record2RecordDto;
 import com.huidi.cruise.domain.Record;
 import com.huidi.cruise.utils.ExcelUtils;
+import com.huidi.cruise.utils.StringUtils;
 import com.huidi.cruise.utils.TimeUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -39,18 +39,18 @@ public class Main {
         }
         //准备船只数据
         for (int i = 1; i <= 5; i++) {
-            Ship ship = new Ship(String.valueOf(i), 200);
+            Ship ship = new Ship("B" + i, 200);
             bigShips.add(ship);
         }
 
         for (int i = 6; i <= 18; i++) {
-            Ship ship = new Ship(String.valueOf(i), 100);
+            Ship ship = new Ship("S" + (i - 5), 100);
             smallShips.add(ship);
         }
 
         Algorithm m = new Algorithm(new Date(System.currentTimeMillis()), startTime, endTime, startBerths, arriveBerths, bigShips, smallShips, (int) ((int) ShipConstant.WAIT_SECOND * AlgorithmConstant.DELAYRATE));
 
-        ArrayList<ArrayList<Record>> recordsList = m.findMax(25000)/*m.findOpt(5500)*/;
+        ArrayList<ArrayList<Record>> recordsList = m.findMax(25000)/*m.findOpt(10200)*/;
 
 
         for (Record backRecord : recordsList.get(0)) {
@@ -60,9 +60,9 @@ public class Main {
 
         //统计来回船的工作量
         System.out.println(recordsList.get(0).size() + recordsList.get(1).size());
-        int result[] = new int[20];
+        int result[] = new int[30];
         for (Record record : recordsList.get(0)) {
-            result[Integer.parseInt(record.getShipName())] += 1;
+            result[StringUtils.getShipId(record.getShipName())] += 1;
         }
 
         int result1[] = new int[8];
@@ -75,7 +75,7 @@ public class Main {
         }
 
         for (Record record : recordsList.get(1)) {
-            result[Integer.parseInt(record.getShipName())] += 1;
+            result[StringUtils.getShipId(record.getShipName())] += 1;
         }
         for (int i = 1; i < 19; i++) {
             if (i == 6) System.out.println();
@@ -127,9 +127,9 @@ public class Main {
             System.out.println(num);
         }
 
-        for (Record record : recordList1) {
-            record.setShipName(Integer.parseInt(record.getShipName()) < 6 ? "B" + record.getShipName() : "S" + (Integer.parseInt(record.getShipName()) - 5));
-        }
+        /*for (Record record : recordList1) {
+            record.setShipName(StringUtils.getShipId(record.getShipName())< 6 ? "B" + record.getShipName() : "S" + (Integer.parseInt(record.getShipName()) - 5));
+        }*/
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String title = "Records " + sdf.format(new Date(System.currentTimeMillis()));
         HSSFWorkbook hssfWorkbook = ExcelUtils.generateHSSFWorkbook(Record2RecordDto.convert2Excel(Record2RecordDto.convert(recordList1)), title);
@@ -167,13 +167,13 @@ public class Main {
             cell.setCellValue(result[i]);
         }
 
-        try {
+        /*try {
             File file=new File("."+File.separatorChar+"doc"+File.separatorChar + "findMax(25000)"+new Date(System.currentTimeMillis()).toString() + ".xls");
             file.createNewFile();
             hssfWorkbook.write(file);
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
 //        System.out.println("hou:"+newRecords2.stream().mapToInt(e -> e.getShipTraffic()).sum());
 

@@ -119,12 +119,13 @@ public class StringUtils extends org.springframework.util.StringUtils {
         return name;
     }
 
+
     public static int getShipId(String name) {
         int result = 0;
         if (ShipConstant.BIGSHIP.equals(name.substring(0, 1))) {
-            result = Integer.parseInt(name.substring(1, 2));
+            result = Integer.parseInt(name.substring(1));
         } else {
-            result = Integer.parseInt(name.substring(1, 2)) + ShipConstant.DEVIDED;
+            result = Integer.parseInt(name.substring(1)) + ShipConstant.DEVIDED;
         }
         return result;
     }

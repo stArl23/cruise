@@ -5,6 +5,7 @@ import com.huidi.cruise.constant.AlgorithmConstant;
 import com.huidi.cruise.constant.BerthConstant;
 import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.domain.Record;
+import com.huidi.cruise.utils.StringUtils;
 import com.huidi.cruise.utils.TimeUtils;
 
 import java.sql.Date;
@@ -63,7 +64,7 @@ public class Algorithm {
             } else if (o1.getFreq() * o1.getPriority() < o2.getFreq() * o2.getPriority()) {
                 return -1;
             } else {
-                return Integer.parseInt(o1.getName()) > Integer.parseInt(o2.getName()) ? 1 : -1;
+                return StringUtils.getShipId(o1.getName()) > StringUtils.getShipId(o2.getName()) ? 1 : -1;
             }
         };
         this.ships = new Heap<>(this.bigShips.size() + this.smallShips.size(), shipComparator);

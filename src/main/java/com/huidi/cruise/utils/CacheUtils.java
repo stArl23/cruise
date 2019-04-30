@@ -5,6 +5,7 @@ import java.util.HashMap;
 public class CacheUtils {
     private static final HashMap<String,Object> cacheMap=new HashMap<>();
 
+
     public static void setObject(String key,Object object){
         cacheMap.put(key,object);
     }

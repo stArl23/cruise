@@ -11,8 +11,6 @@ import com.huidi.cruise.domain.Berth;
 import com.huidi.cruise.domain.Record;
 import com.huidi.cruise.domain.Ship;
 import com.huidi.cruise.dto.RecordDto;
-import com.huidi.cruise.enums.RecordEnums;
-import com.huidi.cruise.exception.RecordException;
 import com.huidi.cruise.form.RecordRequestForm;
 import com.huidi.cruise.repository.BerthRepository;
 import com.huidi.cruise.repository.RecordRepository;
@@ -77,17 +75,19 @@ public class RecordServiceImpl implements RecordService {
 
     @Override
     public List<Record> listRecords(String date) {
-        return recordRepository.findAllByDate(Date.valueOf(date));
+        List<Record> records = recordRepository.findAllByDate(Date.valueOf(date));
+        return Objects.isNull(records) ? new ArrayList<>() : records;
     }
 
     @Override
     public void deleteRecord(String id) {
         Record record = recordRepository.getOne(id);
-        if (Objects.isNull(record))
+        if (Objects.nonNull(record))
+            recordRepository.deleteById(id);
             //数据库中无该记录
-            throw new RecordException(RecordEnums.RECORD_NOT_EXIST.getId()
-                    , RecordEnums.RECORD_NOT_EXIST.getMessage());
-        recordRepository.deleteById(id);
+            /*throw new RecordException(RecordEnums.RECORD_NOT_EXIST.getId()
+                    , RecordEnums.RECORD_NOT_EXIST.getMessage());*/
+
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.huidi.cruise.handler;
 
 import com.huidi.cruise.VO.ResultVO;
-import com.huidi.cruise.enums.RecordEnums;
 import com.huidi.cruise.exception.*;
 import com.huidi.cruise.service.RecordService;
 import com.huidi.cruise.utils.ResultVOUtils;
@@ -9,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.sql.Date;
 
 
 @ControllerAdvice
@@ -38,10 +35,11 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(value = RecordException.class)
     @ResponseBody
+    //TODO 调整策略，如果发布过返回成功然后跳转
     public ResultVO HandlerException(RecordException ex) {
-        if (RecordEnums.RECORD_ALREADY_PUBLISH.getId().equals(ex.getId())) {
+     /*   if (RecordEnums.RECORD_ALREADY_PUBLISH.getId().equals(ex.getId())) {
             return ResultVOUtils.success(recordService.listRecords(new Date(System.currentTimeMillis()).toString()));
-        }
+        }*/
         return ResultVOUtils.error(ex.getId(), ex.getMessage());
     }
 
