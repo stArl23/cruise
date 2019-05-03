@@ -40,6 +40,19 @@ public class Record implements Serializable{
     public Record() {
     }
 
+    public Record(String id, Integer startBerth, Integer arriveBerth, String shipName, Integer shipTraffic, Time startTime, Time arriveTime, Time onOrOutTime, Time totalTime, Date date) {
+        this.id = id;
+        this.startBerth = startBerth;
+        this.arriveBerth = arriveBerth;
+        this.shipName = shipName;
+        this.shipTraffic = shipTraffic;
+        this.startTime = startTime;
+        this.arriveTime = arriveTime;
+        this.onOrOutTime = onOrOutTime;
+        this.totalTime = totalTime;
+        this.date = date;
+    }
+
     public Record(RecordParams recordParams) {
         this.id= KeyUtils.genUniqueKey();
         this.startBerth = Integer.valueOf(recordParams.getStartBerth().getName());

@@ -6,4 +6,7 @@ public interface BerthConstant {
     String SUFFIX = "";
     //number <=4 is off island berthes when 5,6,7,8,9 is in island berthes
     Integer DEVIDED = 4;
+
+    String IN_ISLAND_T_BERTH = "in .t";
+    String OFF_ISLAND_T_BERTH = "out .t";
 }
