@@ -4,7 +4,9 @@ import com.huidi.cruise.constant.AlgorithmConstant;
 import com.huidi.cruise.constant.ShipConstant;
 import com.huidi.cruise.converter.Record2RecordDto;
 import com.huidi.cruise.domain.Record;
+import com.huidi.cruise.dto.RecordDto;
 import com.huidi.cruise.utils.ExcelUtils;
+import com.huidi.cruise.utils.RecordsVOutils;
 import com.huidi.cruise.utils.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -25,7 +27,7 @@ public class Main {
         ArrayList<Ship> bigShips = new ArrayList<>();
         Time startTime = Time.valueOf("07:00:00");
         Time endTime = Time.valueOf("18:00:00");
-        Time loopTime = Time.valueOf("00:30:00");
+        Time loopTime = Time.valueOf("02:00:00");
         //准备码头数据
         for (int i = 1; i <= 4; i++) {
             Berth berth = new Berth(String.valueOf(i), true, null, null);
@@ -49,8 +51,16 @@ public class Main {
 
         Algorithm m = new Algorithm(new Date(System.currentTimeMillis()), startTime, endTime, startBerths, arriveBerths, bigShips, smallShips, (int) ((int) ShipConstant.WAIT_SECOND * AlgorithmConstant.DELAYRATE));
 
-        ArrayList<ArrayList<Record>> recordsList = /*m.findMax(30000)*/m.findOpt(11000);
+        ArrayList<ArrayList<Record>> recordsList = /*m.findMax(30000)*/m.findOpt(18000);
 
+        int res = recordsList.get(0).stream().mapToInt(e -> e.getShipTraffic()).sum();
+
+        System.out.println(res);
+        ArrayList<RecordDto> recordDtos = (ArrayList<RecordDto>) Record2RecordDto.convert(recordsList.get(0));
+        RecordsVOutils.setTempBerth(recordDtos);
+        for (RecordDto r : recordDtos) {
+            System.out.println(r);
+        }
         //仅仅来或者回的客流量
 
         //统计来回船的工作量
@@ -170,7 +180,7 @@ public class Main {
             cell.setCellValue(result[i]);
         }
 
-       /* try {
+      /*  try {
             File file=new File("."+File.separatorChar+"doc"+File.separatorChar + "findOpt(11000)"+new Date(System.currentTimeMillis()).toString() + ".xls");
             file.createNewFile();
             hssfWorkbook.write(file);

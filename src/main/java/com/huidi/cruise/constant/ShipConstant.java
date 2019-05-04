@@ -2,6 +2,8 @@ package com.huidi.cruise.constant;
 
 public interface ShipConstant {
     Integer TRAVELTIME = 15;
+    Integer SMALL_NUM = 13;
+    Integer BIG_NUM = 13;
     Integer IN_SEA_SECOND = TRAVELTIME * 60;
     Integer WAIT_SECOND = 200;
     //Integer AVG_SHIP_CUSTOMERS = 100;//average go traffic

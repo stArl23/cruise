@@ -61,6 +61,7 @@ public class AlgorithmTest {
         for (Record r1 : records.get(0)) {
             System.out.println(r1);
         }
+
         recordRepository.saveAll(records.get(0));
 
     }

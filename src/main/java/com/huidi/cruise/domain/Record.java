@@ -15,7 +15,7 @@ import java.util.Objects;
 @Data
 @Entity
 public class Record implements Serializable{
-    private static final long serialVersionUID=42L;
+    public static final long serialVersionUID = 42L;
     @Id
     private String id;
     // ship start from which berth

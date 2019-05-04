@@ -15,20 +15,20 @@ public class Record2RecordDto {
         return new RecordDto(record.getId(),record.getArriveTime(), record.getShipName()
                 , StringUtils.getBerthName(record.getStartBerth())
                 , StringUtils.getBerthName(record.getArriveBerth())
-                , record.getStartTime(), record.getTotalTime().toString()
+                , record.getStartTime()
                 , record.getTotalTime().toString());
     }
 
     public static Excelable convert2Excel(RecordDto recordDto){
-        return (Excelable)recordDto;
+        return recordDto;
     }
 
 
     public static List<RecordDto> convert(List<Record> records) {
-        return records.stream().map(e -> convert(e)).collect(Collectors.toList());
+        return records.stream().map(Record2RecordDto::convert).collect(Collectors.toList());
     }
 
     public static List<Excelable> convert2Excel(List<RecordDto> recordDtos){
-        return recordDtos.stream().map(e -> convert2Excel(e)).collect(Collectors.toList());
+        return recordDtos.stream().map(Record2RecordDto::convert2Excel).collect(Collectors.toList());
     }
 }

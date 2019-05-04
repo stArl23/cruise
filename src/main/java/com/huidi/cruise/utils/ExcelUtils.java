@@ -7,20 +7,18 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ExcelUtils {
     public static HSSFWorkbook generateHSSFWorkbook(List<Excelable> excelables, String title) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        //TODO
         //改为抛出异常交给service层处理
         if (excelables.size() < 1)
             throw new RuntimeException("excel表格为空");
@@ -53,30 +51,26 @@ public class ExcelUtils {
                 try {
                     //得到基础类型的值
                     if (type.contains("int")||type.contains(Integer.class.getName())) {
-                        int temp = (Integer) excuteMethod(ex, name);
+                        int temp = (Integer) executeMethod(ex, name);
                         cell.setCellValue(temp);
                     }
                     //得到对象包括String
                     else if (type.contains(String.class.getName())) {
-                        cell.setCellValue((String) excuteMethod(ex, name));
+                        cell.setCellValue((String) executeMethod(ex, name));
                     } else if (type.contains(Date.class.getName())) {
-                        Date temp = (Date) excuteMethod(ex, name);
+                        Date temp = (Date) executeMethod(ex, name);
                         if (temp != null)
                             cell.setCellValue(sdf.format(temp));
                     }else if(type.contains(Time.class.getName())){
-                        Time temp=(Time) excuteMethod(ex,name);
+                        Time temp = (Time) executeMethod(ex, name);
                         if(temp!=null)
                             cell.setCellValue(temp.toString());
                     }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
 
-               /*MethodUtils.invokeExactMethod(excelables,"get"+name.substring(0,1).toUpperCase()+name.substring(1));*/
+                /*MethodUtils.invokeExactMethod(excelables,"get"+name.substring(0,1).toUpperCase()+name.substring(1));*/
             }
         }
 
@@ -92,7 +86,7 @@ public class ExcelUtils {
     }
 
 
-    private static Object excuteMethod(Excelable excelable,String name) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    private static Object executeMethod(Excelable excelable, String name) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return MethodUtils.invokeExactMethod(excelable,"get"+name.substring(0,1).toUpperCase()+name.substring(1));
     }
 }
