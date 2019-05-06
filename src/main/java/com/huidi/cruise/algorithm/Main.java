@@ -27,7 +27,7 @@ public class Main {
         ArrayList<Ship> bigShips = new ArrayList<>();
         Time startTime = Time.valueOf("07:00:00");
         Time endTime = Time.valueOf("18:00:00");
-        Time loopTime = Time.valueOf("02:00:00");
+        Time loopTime = Time.valueOf("01:00:00");
         //准备码头数据
         for (int i = 1; i <= 4; i++) {
             Berth berth = new Berth(String.valueOf(i), true, null, null);
@@ -51,7 +51,7 @@ public class Main {
 
         Algorithm m = new Algorithm(new Date(System.currentTimeMillis()), startTime, endTime, startBerths, arriveBerths, bigShips, smallShips, (int) ((int) ShipConstant.WAIT_SECOND * AlgorithmConstant.DELAYRATE));
 
-        ArrayList<ArrayList<Record>> recordsList = /*m.findMax(30000)*/m.findOpt(18000);
+        ArrayList<ArrayList<Record>> recordsList = m.findMax(30000)/*m.findOpt(18000)*/;
 
         int res = recordsList.get(0).stream().mapToInt(e -> e.getShipTraffic()).sum();
 
@@ -65,12 +65,12 @@ public class Main {
 
         //统计来回船的工作量
         System.out.println(recordsList.get(0).size() + recordsList.get(1).size());
-        int result[] = new int[30];
+        int[] result = new int[30];
         for (Record record : recordsList.get(0)) {
             result[StringUtils.getShipId(record.getShipName())] += 1;
         }
 
-        int result1[] = new int[8];
+        int[] result1 = new int[8];
         for (Berth berth : startBerths) {
             result1[Integer.parseInt(berth.getName())] = berth.getFreq();
         }

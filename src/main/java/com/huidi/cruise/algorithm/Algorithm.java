@@ -43,7 +43,7 @@ public class Algorithm {
         berths = new ArrayList<>();
         this.startTime = startTime;
         this.endTime = endTime;
-        this.loopInterval = TimeUtils.secondToTime(AlgorithmConstant.LOOP_SECOND * 4);
+        this.loopInterval = TimeUtils.secondToTime(AlgorithmConstant.LOOP_SECOND * 2);
         this.bigShips = bigShips;
         this.smallShips = smallShips;
         this.startBerths = startBerths;
@@ -153,8 +153,7 @@ public class Algorithm {
      * Second prune
      * 如果两出发码相同且，两出发时间之差小于200s(上下船时间)则排航序列无效
      *
-     * @param records
-     * @return
+     * @param records list of go back list and go island list
      */
     @Deprecated
     private void timeFilter(ArrayList<ArrayList<Record>> records) {
@@ -460,12 +459,12 @@ public class Algorithm {
         updateRecords(records, new ArrayList<>(), new ArrayList<>());
 
         Time loopInterval = this.loopInterval;
-        int loopNumber = TimeUtils.timeToSecond(TimeUtils.timeOperation("-", endTime, startTime)) / AlgorithmConstant.LOOP_SECOND;
+        int loopNumber = TimeUtils.timeToSecond(TimeUtils.timeOperation("-", endTime, startTime)) / TimeUtils.timeToSecond(this.loopInterval);
         //generate interval list
         Time start = startTime;
         Time startTimeTemp;
         Time backTimeTemp = start;
-        Time actual_backTime = TimeUtils.timeOperation("+", startTime, TimeUtils.secondToTime(AlgorithmConstant.LOOP_SECOND * 2));
+        Time actual_backTime = TimeUtils.timeOperation("+", startTime, this.loopInterval);
 
         for (int i = 0; i < loopNumber; i++) {
             int toNumber = 0;
@@ -670,9 +669,9 @@ public class Algorithm {
      * @param timeTemp start time
      * @param goList   go island list
      * @param ship     ship is be selected
-     * @param isback
+     * @param isBack go back or not
      */
-    private void directGo(Time timeTemp, List<Record> goList, Ship ship, boolean isback) {
+    private void directGo(Time timeTemp, List<Record> goList, Ship ship, boolean isBack) {
         Time earlyStartBusyTime = /*timeTemp*/TimeUtils.timeOperation("-", timeTemp, TimeUtils.secondToTime(wait_second));
         Time lateStartBusyTime = timeTemp;
         Time earlyArriveBusyTime = TimeUtils.timeOperation("+", timeTemp, TimeUtils.secondToTime(ShipConstant.IN_SEA_SECOND));
@@ -680,7 +679,7 @@ public class Algorithm {
         //find opt berth
         Berth startBerth;
         Berth arriveBerth;
-        if (!isback) {
+        if (!isBack) {
             startBerth = findBerth(startBerths, earlyStartBusyTime, lateStartBusyTime);
             arriveBerth = findBerth(arriveBerths, earlyArriveBusyTime, lateArriveBusyTime);
         } else {
@@ -800,7 +799,7 @@ public class Algorithm {
     /***
      *  get start index of
      * @param records records contains 4 elements
-     * @return
+     * @return index of start ship(100:0 100:1 100:2 200:3)
      */
     private int getStartIndex(List<Record> records) {
         int before_start_index = 0;
